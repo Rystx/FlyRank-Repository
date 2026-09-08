@@ -82,3 +82,28 @@ def get_stats():
 def reset():
     reset_tasks()
     return tasks
+
+
+#Stage 3
+
+@app.post("/tasks", status_code=201, summary="Create a task", description="Creates a new task from a title. The new task starts with done set to false.")
+def create_task(body: CreateTaskRequest):
+    title = body.title.strip() if body.title else ""
+
+    if title == "":
+        raise HTTPException(status_code=400, detail="title is required and cannot be empty")
+
+    new_id = 1 if len(tasks) == 0 else max(t["id"] for t in tasks) + 1
+    task = {"id": new_id, "title": title, "done": False}
+
+    tasks.append(task)
+    return task
+
+@app.get("/tasks/{id}", summary="Get one task", description="Returns a single task by id, or a 404 error if it doesn't exist.")
+def get_task(id: int):
+    task = next((t for t in tasks if t["id"] == id), None)
+
+    if task is None:
+        raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+    return task
