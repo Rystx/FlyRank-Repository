@@ -34,3 +34,18 @@ tasks = [dict(task) for task in SEED_TASKS]
 def reset_tasks():
     tasks.clear()
     tasks.extend(dict(task) for task in SEED_TASKS)
+
+
+#Stage 1
+
+@app.get("/", summary="API info", description="Returns basic metadata about the API.")
+def root():
+    return {
+        "name": "Task API",
+        "version": "1.0",
+        "endpoints": ["/tasks", "/stats", "/reset"],
+    }
+
+@app.get("/health", summary="Health check", description="Returns a simple status to confirm the server is alive.")
+def health():
+    return {"status": "ok"}
