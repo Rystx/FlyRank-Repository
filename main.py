@@ -107,3 +107,39 @@ def get_task(id: int):
         raise HTTPException(status_code=404, detail=f"Task {id} not found")
 
     return task
+
+#Stage 4
+
+@app.put("/tasks/{id}", summary="Update a task", description="Updates a task's title and/or done status. At least one field must be provided.")
+def update_task(id: int, body: UpdateTaskRequest):
+    task = next((t for t in tasks if t["id"] == id), None)
+
+    if task is None:
+        raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+    has_title = body.title is not None
+    has_done = body.done is not None
+
+    if not has_title and not has_done:
+        raise HTTPException(status_code=400, detail="request body must include title and/or done")
+
+    if has_title:
+        trimmed = body.title.strip()
+        if trimmed == "":
+            raise HTTPException(status_code=400, detail="title cannot be empty")
+        task["title"] = trimmed
+
+    if has_done:
+        task["done"] = body.done
+
+    return task
+
+@app.delete("/tasks/{id}", status_code=204, summary="Delete a task", description="Deletes a task by id, or returns a 404 error if it doesn't exist.")
+def delete_task(id: int):
+    index = next((i for i, t in enumerate(tasks) if t["id"] == id), -1)
+
+    if index == -1:
+        raise HTTPException(status_code=404, detail=f"Task {id} not found")
+
+    tasks.pop(index)
+    return None
